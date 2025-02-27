@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hệ thống giám sát mực nước</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+            crossorigin="anonymous">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+            integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+            crossorigin="anonymous" />
+        <link rel="stylesheet" href="tb2.css">
+        <link rel='shortcut icon' href='ICON.jpg' />
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.min.css">
+        <script
+            src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+            <p
+                style="text-align:center; margin-top: 10px; background-color:aqua; height:60px; border-radius:20px; color:rgb(2, 2, 96); border-color:rgb(251, 3, 3); padding-top: 10px;">
+                <strong>HỆ THỐNG IOT GIÁM SÁT MỰC NƯỚC TRÊN ĐỒNG RUỘNG</strong>
+            </p>
+            <center>
+                <h1
+                    style="font-size: 15px; color:red ;  text-align: center; display: inline-block;">Kiểm tra kết nối: </h1>
+                <h1 id="gio"
+                    style="font-size: 15px; color:red ;  text-align: center; display: inline-block;">đang kết nối</h1>
+               
+            </center>
+            <center>
+                <p style="font-size: 20px; color: #051196;margin: 0;">
+                    <strong>Độ cao mực nước hiện tại</strong></p>
+                <p id="muc_nuoc">
+                    <strong>20</strong>
+                    <span class="small">cm</span>
+                </p>
+                <p id="chieu_cao" style="font-size: 20px;color: #002fff;">Mực
+                    nước cảnh báo: </p>
+                <input type="number" id="inputNumber" placeholder="Đơn vị cm">
+                <button id="submitButton">Gửi</button>
+
+                <p id="khoan_bu" style="font-size: 20px;color: #002fff;">Khoản bù mực nước: </p>
+                <input type="number3" id="inputNumber3" placeholder="Đơn vị cm">
+                <button id="submitButton3">Gửi</button>
+
+                <p id="gmail"
+                    style="font-size: 18px;color: #002fff;margin-top: 10px;">Gmail:
+                    pn404050@gmail.com</p>
+                <input type="number2" id="inputNumber2" placeholder="Gmail">
+                <button id="submitButton2">Gửi</button>
+                <h5 style="margin-top: 10px; color: #002fff;">Kiểm tra an toàn</h5>
+
+                <img name="canhbao" src="./an toan.png" alt="sang" width="100%"
+                    style="border-radius: 10px;">
+
+                    <p
+                    style="font-size: 20px; color: #ff1601; margin: 10px 0 5px; font-weight: bold;">Vị trí hiện tại của hệ thống</p>
+                <a id="map-link" href="#" target="_blank"
+                    style="display: none; font-size: 20px; margin-top: 0;"> -> Xem trên Google maps <- </a>
+            </center>
+
+        </body>
+        <script
+            src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
+        <script
+            src="https://www.gstatic.com/firebasejs/8.2.10/firebase-database.js"></script>
+
+        <script
+            src="https://www.gstatic.com/firebasejs/8.2.10/firebase-analytics.js"></script>
+
+        <script type="module">
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDCRDiY9YzCwtnevuG5-7GT4peNk11eFKI",
+  authDomain: "xerobot-8a5d0.firebaseapp.com",
+  databaseURL: "https://xerobot-8a5d0-default-rtdb.firebaseio.com",
+  projectId: "xerobot-8a5d0",
+  storageBucket: "xerobot-8a5d0.firebasestorage.app",
+  messagingSenderId: "529394251086",
+  appId: "1:529394251086:web:c9226a1a2f2f90f40fda1f",
+  measurementId: "G-W42QQY32R3"
+};
+    
+    
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+var valueTemp3 = firebase.database().ref().child('gio');
+valueTemp3.on('value',snap =>{
+
+    document.getElementById("gio").innerHTML=snap.val();
+  
+});
+
+//////////////////////////////////////////////////////////////////////////////
+var mucnuoc = firebase.database().ref().child('Muc_nuoc');
+mucnuoc.on('value',snap =>{
+
+   // document.getElementById("muc_nuoc").innerHTML=snap.val();
+    document.getElementById("muc_nuoc").innerHTML = `<strong>${snap.val()}</strong> <span class="small">cm</span>`;
+   
+});
+
+/////////////////////////
+var valuehouron = firebase.database().ref().child('/Canh_bao');
+valuehouron.on('value', snap => {
+    document.getElementById("chieu_cao").innerHTML = "Mực nước cảnh báo: " + snap.val() + " cm";
+});
+
+var inputNumber = document.getElementById('inputNumber');
+var submitButton = document.getElementById('submitButton');
+
+submitButton.addEventListener('click', function () {
+    var numberValue = inputNumber.value;
+    var intValue = parseInt(numberValue);
+
+    if (!isValidNumber(intValue)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Giá trị không hợp lệ. Vui lòng nhập số!',
+        });
+    } else if (intValue <= 0) {
+        intValue = 1;
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Giá trị không thể nhỏ hơn hoặc bằng 0!',
+        });
+    } else if (intValue > 100) {
+        intValue = 50;
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Bạn chỉ có thể đặt tối đa là 100!',
+        });
+    } else {
+        // Gửi dữ liệu lên Firebase
+        var firebaseRef = firebase.database().ref().child('/Canh_bao');
+        firebaseRef.set(intValue)
+            .then(function () {
+                // Đặt lại giá trị của ô nhập liệu thành chuỗi rỗng
+                inputNumber.value = "";
+            })
+            .catch(function (error) {
+                console.log("Lỗi khi gửi dữ liệu:", error);
+            });
+    }
+});
+
+function isValidNumber(value) {
+    return !isNaN(value) && Number.isInteger(value);
+}
+///////////////////////////////////////////////////////////////////////
+/////////////////////////
+var valuehouron3 = firebase.database().ref().child('/Khoan_bu');
+valuehouron3.on('value', snap => {
+    document.getElementById("khoan_bu").innerHTML = "Khoản bù mực nước: " + snap.val() + " cm";
+});
+
+var inputNumber3 = document.getElementById('inputNumber3');
+var submitButton3 = document.getElementById('submitButton3');
+
+submitButton3.addEventListener('click', function () {
+    var numberValue3 = inputNumber3.value;
+    var intValue3 = parseInt(numberValue3);
+
+    if (!isValidNumber3(intValue3)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Giá trị không hợp lệ. Vui lòng nhập số!',
+        });
+    } else if (intValue3 < 0) {
+        intValue3 = 0;
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Giá trị không thể nhỏ hơn 0!',
+        });
+    } else if (intValue3 > 100) {
+        intValue3 = 50;
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Bạn chỉ có thể đặt tối đa là 100!',
+        });
+    } else {
+        // Gửi dữ liệu lên Firebase
+        var firebaseRef = firebase.database().ref().child('/Khoan_bu');
+        firebaseRef.set(intValue3)
+            .then(function () {
+                // Đặt lại giá trị của ô nhập liệu thành chuỗi rỗng
+                inputNumber3.value = "";
+            })
+            .catch(function (error) {
+                console.log("Lỗi khi gửi dữ liệu:", error);
+            });
+    }
+});
+
+function isValidNumber3(value) {
+    return !isNaN(value) && Number.isInteger(value);
+}
+///////////////////////////////////////////////////////////////////////
+var valuehouron = firebase.database().ref().child('/Gmail');
+valuehouron.on('value', snap => {
+    document.getElementById("gmail").innerHTML = "Gmail: " + snap.val();
+});
+
+var inputNumber2 = document.getElementById('inputNumber2');
+var submitButton2 = document.getElementById('submitButton2');
+
+submitButton2.addEventListener('click', function () {
+    var emailValue = inputNumber2.value;
+
+    if (!isValidEmail(emailValue)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Cảnh báo.',
+            text: 'Địa chỉ Gmail không hợp lệ!',
+        });
+    } else {
+        // Gửi dữ liệu lên Firebase
+        var firebaseRef = firebase.database().ref().child('/Gmail');
+        firebaseRef.set(emailValue)
+            .then(function () {
+                // Đặt lại giá trị của ô nhập liệu thành chuỗi rỗng
+                inputNumber2.value = "";
+            })
+            .catch(function (error) {
+                console.log("Lỗi khi gửi dữ liệu:", error);
+            });
+    }
+});
+
+function isValidEmail(email) {
+    // Regular expression for validating an Email
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+}
+
+
+var Kinh_do = firebase.database().ref().child('Kinh_do');
+var Vi_do = firebase.database().ref().child('Vi_do');
+
+let latitude = null;
+let longitude = null;
+
+// Lắng nghe dữ liệu từ Firebase
+Kinh_do.on('value', (snap) => {
+    latitude = snap.val();
+    updateLink();
+});
+
+Vi_do.on('value', (snap) => {
+    longitude = snap.val();
+    updateLink();
+});
+
+// Cập nhật liên kết Google Maps
+function updateLink() {
+    const mapLink = document.getElementById('map-link');
+    const statusMessage = document.getElementById('status-message'); // Phần tử hiển thị trạng thái
+
+    // if (latitude === 0 && longitude === 0) {
+    //     // Nếu mất tín hiệu GPS
+    //     document.getElementById("map-link").innerHTML ="Mất kết nối GPS";
+    //     //statusMessage.innerText = ;
+    //     mapLink.style.display = 'none'; // Ẩn liên kết Google Maps
+    // } 
+    if (latitude !== null && longitude !== null) {
+        // Nếu tín hiệu GPS hợp lệ
+        const googleMapsLink = `https://www.google.com/maps?q=${longitude},${latitude}`; 
+
+        const mapLink = document.getElementById('map-link');
+        mapLink.href = googleMapsLink;
+        mapLink.style.display = 'inline-block';
+    }
+}
+
+var Rung1 = firebase.database().ref().child('/rung');
+Rung1.on('value', snap => {
+    const value = snap.val(); // Lấy giá trị từ snapshot
+
+    if (value === 1) {
+        console.log('1');
+        document.images['canhbao'].src = './an toan.png';
+        document.images['canhbao'].classList.remove('blink'); // Xóa hiệu ứng chóp chóp
+    } else if (value === 0) {
+        console.log('0');
+        document.images['canhbao'].src = './canh bao.png';
+        document.images['canhbao'].classList.add('blink'); // Thêm hiệu ứng chóp chóp
+    }
+});
+  </script>
+    </html>
